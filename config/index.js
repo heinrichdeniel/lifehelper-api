@@ -13,6 +13,9 @@ module.exports = {
     },
     google: {
 
+    },
+    "production": {
+        "use_env_variable": "DATABASE_URL"
     }
 
 };

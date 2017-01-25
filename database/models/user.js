@@ -1,35 +1,31 @@
-var Sequelize = require('Sequelize');
-var sequelize = require('../index').sequelize;
-
-var User = sequelize.define('user', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    username: {
-        type: Sequelize.STRING,
-        unique: true
-    },
-    email: {
-        type: Sequelize.STRING,
-        unique: true
-    },
-    password: Sequelize.STRING,
-    google_id: {
-        type: Sequelize.STRING,
-        unique: true
-    },
-    facebook_id: {
-        type: Sequelize.STRING,
-        unique: true
-    },
-    photo_url: Sequelize.STRING,
-    deleted: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-    }
-
-});
-/*INSERT INTO `users`(`id`, `username`, `email`, `password`) VALUES (1,'deniel','heinrichdeniel@yahoo.com','password')*/
-exports.User = User;
+module.exports = function(sequelize, DataTypes) {
+    return sequelize.define("User", {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        username: {
+            type: DataTypes.STRING,
+            unique: true
+        },
+        email: {
+            type: DataTypes.STRING,
+            unique: true
+        },
+        password: DataTypes.STRING,
+        google_id: {
+            type: DataTypes.STRING,
+            unique: true
+        },
+        facebook_id: {
+            type: DataTypes.STRING,
+            unique: true
+        },
+        photo_url: DataTypes.STRING,
+        deleted: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
+    })
+};

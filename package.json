@@ -14,8 +14,9 @@
     "jsonwebtoken": "^5.7.0",
     "jwt-simple": "^0.5.1",
     "morgan": "~1.7.0",
-    "mysql": "^2.11.1",
-    "sequelize": "^3.24.0",
+    "mysql": "^2.13.0",
+    "pg": "^6.1.2",
+    "sequelize": "^3.30.0",
     "serve-favicon": "~2.3.0"
   }
 }

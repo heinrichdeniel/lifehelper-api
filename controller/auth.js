@@ -1,5 +1,5 @@
 var Sequelize = require('Sequelize');
-var User   = require('../database/models').User;
+var User   = require('../database').User;
 var config = require('../config');
 var jwt    = require('jwt-simple'); // used to create, sign, and verify tokens
 var express = require('express');
