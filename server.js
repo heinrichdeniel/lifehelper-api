@@ -28,8 +28,8 @@ app.use(function(req, res, next) {
 
 
 db.sequelize.sync().then(function() {
-    app.listen(8080, function () {
-        debug('API container started on port ' + 8080);
+    app.listen(5000, function () {
+        debug('API container started on port ' + 5000);
     });
 });
 
