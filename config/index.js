@@ -3,19 +3,22 @@ module.exports = {
         secret: "ToPsEcReTfOrJwTtOkEn"
     },
     database: {
-        host: "localhost",
-        name: "lifehelper",
-        user: "deniel",
-        password: "superSecret"
+        development: {
+            host: "localhost",
+            name: "lifehelper",
+            user: "deniel",
+            password: "superSecret"
+        },
+        production: {
+            "use_env_variable": "DATABASE_URL"
+        }
+
     },
     facebook: {
         appId: '235743573538702'
     },
     google: {
 
-    },
-    "production": {
-        "use_env_variable": "DATABASE_URL"
     }
 
 };

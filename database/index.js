@@ -1,31 +1,16 @@
 var Sequelize = require('Sequelize');
 var database = require('../config').database;
 
-var sequelize = new Sequelize(database.name, database.user, database.password, {
-    host: database.host,
-    dialect: 'mysql',
-    logging: false,
-    pool: {
-        max: 5,
-        min: 0,
-        idle: 10000
-    }
-});
-
-exports.sequelize = sequelize;
-
 if (!global.hasOwnProperty('db')) {     //ha mar letre volt hozva a kapcsolat akkor nem keszit ujjat
     var Sequelize = require('sequelize');
     var database = require('../config').database;
 
-    if (process.env.HEROKU_POSTGRESQL_BRONZE_URL) {
+    if (database.production.use_env_variable) {
         // hoston valo futtatas eseten
-        sequelize = new Sequelize(process.env.HEROKU_POSTGRESQL_BRONZE_URL, {
-            dialect:  'postgres',
-            protocol: 'postgres',
-            port:     match[4],
-            host:     match[3],
-            logging:  true //false
+        sequelize = new Sequelize(process.env[database.production.use_env_variable], {
+            dialectOptions: {
+                ssl: true /* for SSL config since Heroku gives you this out of the box */
+            }
         })
     } else {
         // lokalis futtatas eseten
