@@ -1,4 +1,3 @@
-var Sequelize = require('Sequelize');
 var database = require('../config').database;
 
 if (!global.hasOwnProperty('db')) {     //ha mar letre volt hozva a kapcsolat akkor nem keszit ujjat
