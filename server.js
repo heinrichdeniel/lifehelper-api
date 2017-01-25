@@ -2,8 +2,8 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var cors = require('./middlewares/cors');
-var debug = require('debug')('API:server');
-
+var debug = require('debug')('node-sequelize-postgresql');
+var db = require('./database');
 var auth = require('./routes/auth');
 
 var app = express();
@@ -27,7 +27,7 @@ app.use(function(req, res, next) {
 });
 
 
-db.sequelize.sync({force: true}).then(function() {
+db.sequelize.sync().then(function() {
     app.listen(8080, function () {
         debug('API container started on port ' + 8080);
     });

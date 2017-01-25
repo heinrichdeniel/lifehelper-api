@@ -5,6 +5,7 @@ var express = require('express');
 
 
 exports.login = function(req,res){
+
     User.findOne({where:{username : req.body.username}}).then(function(user){
         if (!user || (user.dataValues.password != req.body.password)){                 //if the username or password is invalid
             res.json({ success: false, message: 'Wrong username or password!'});
