@@ -1,0 +1,12 @@
+var jwt = require('jwt-simple');
+var config = require('../config')
+
+module.exports = function (id , email) {
+    return jwt.encode({                    //creating the jwt.token
+        data: {
+            id: id,
+            email: email
+        },
+        exp: 60*60*3 // expires in 3 hours
+    },config.jwt.secret);
+};
