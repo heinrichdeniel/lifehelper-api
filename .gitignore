@@ -2,3 +2,5 @@ node_modules
 public
 npm-debug.log
 **/.idea/workspace.xml **/.idea/tasks.xml
+heroku
+.idea/workspace.xml

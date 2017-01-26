@@ -56,4 +56,39 @@ exports.loginFacebook = function(req,res){
             });
         }
     })
+};
+
+
+exports.loginGoogle = function(req,res){
+    if (!req.body.google_id) {
+        res.status(400).json({success: false, message: 'Google_id missing in the body of the request'});
+        return;
+    }
+    User.findOne({where:{$or: [{google_id : req.body.google_id}, {email : req.body.email}]}}).then(function(user){
+        if (!user ){                 //if the user not exists in the database
+            User.create({ google_id:  req.body.google_id, username: req.body.name, email: req.body.email, photo_url: req.body.photo_url })
+                .then(function(user2) {
+                    var token = generateToken(user2.dataValues.id, user2.dataValues.email);
+                    res.json({                      //response with status 200
+                        success: true,
+                        message: 'Enjoy your token!',
+                        token: token
+                    });
+                });
+        }
+        else {
+            if (!user.dataValues.google_id){  //if the user not logged in with fb until now
+                user.updateAttributes({
+                    google_id: req.body.google_id
+                });
+            }
+            var token = generateToken(user.dataValues.id, user.dataValues.email);
+
+            res.json({                      //response with status 200
+                success: true,
+                message: 'Enjoy your token!',
+                token: token
+            });
+        }
+    })
 }
