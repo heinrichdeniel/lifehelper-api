@@ -9,7 +9,7 @@ exports.login = function(req,res){
         return;
     }
     User.findOne({where:{email : req.body.email}}).then(function(user){
-        if (!user || (user.dataValues.password != req.body.password)){                 //if the username or password is invalid
+        if (!user || (user.dataValues.password != req.body.password.toString('base64'))){                 //if the username or password is invalid
             res.json({ success: false, message: 'Wrong email address or password!'});
         }
         else {               //in case of successfully login
@@ -20,6 +20,35 @@ exports.login = function(req,res){
                 message: 'Enjoy your token!',
                 token: token
             });
+        }
+    })
+}
+
+exports.registration = function(req,res){
+    if (!req.body.email || !req.body.password || !req.body.username){
+        res.status(400).json({success: false, message: "Name, email address or/and password missing!"});
+        return;
+    }
+    User.findOne({where:{email : req.body.email}}).then(function(user){
+        if (user ){                 //if the email exists in the database
+            res.json({ success: false, message: 'Email is already in use'});
+        }
+        else {
+            User.create({username: req.body.username, email: req.body.email, password: req.body.password.toString('base64')})
+                .then(function(user2) {
+                    var token = generateToken(user2.dataValues.id, user2.dataValues.email);
+                    res.json({                      //response with status 200
+                        success: true,
+                        message: 'Enjoy your token!',
+                        token: token
+                    });
+                })
+                .catch(function(error){
+                    res.json({
+                        success: false,
+                        message: error
+                    });
+                })
         }
     })
 }
@@ -39,7 +68,13 @@ exports.loginFacebook = function(req,res){
                         message: 'Enjoy your token!',
                         token: token
                     });
-                });
+                })
+                .catch(function(error){
+                    res.json({
+                        success: false,
+                        message: error
+                    });
+                })
             }
         else {
             if (!user.dataValues.facebook_id){  //if the user not logged in with fb until now
@@ -74,7 +109,13 @@ exports.loginGoogle = function(req,res){
                         message: 'Enjoy your token!',
                         token: token
                     });
-                });
+                })
+                .catch(function(error){
+                    res.json({
+                        success: false,
+                        message: error
+                    });
+                })
         }
         else {
             if (!user.dataValues.google_id){  //if the user not logged in with fb until now
