@@ -1,5 +1,4 @@
 var User   = require('../database').User;
-var express = require('express');
 
 var generateToken = require('../utils/generateToken');       //this function return value will be the token returned to the client
 
@@ -18,6 +17,7 @@ exports.login = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
+                id: user.dataValues.id,
                 token: token
             });
         }
@@ -40,6 +40,7 @@ exports.registration = function(req,res){
                     res.json({                      //response with status 200
                         success: true,
                         message: 'Enjoy your token!',
+                        id: user2.dataValues.id,
                         token: token
                     });
                 })
@@ -66,6 +67,7 @@ exports.loginFacebook = function(req,res){
                     res.json({                      //response with status 200
                         success: true,
                         message: 'Enjoy your token!',
+                        id: user2.dataValues.id,
                         token: token
                     });
                 })
@@ -87,6 +89,7 @@ exports.loginFacebook = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
+                id: user.dataValues.id,
                 token: token
             });
         }
@@ -107,6 +110,7 @@ exports.loginGoogle = function(req,res){
                     res.json({                      //response with status 200
                         success: true,
                         message: 'Enjoy your token!',
+                        id: user2.dataValues.id,
                         token: token
                     });
                 })
@@ -128,6 +132,7 @@ exports.loginGoogle = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
+                id: user.dataValues.id,
                 token: token
             });
         }

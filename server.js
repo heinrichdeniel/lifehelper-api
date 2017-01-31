@@ -5,6 +5,7 @@ var cors = require('./middlewares/cors');
 var debug = require('debug')('node-sequelize-postgresql');
 var db = require('./database');
 var auth = require('./routes/auth');
+var tasks = require('./routes/tasks');
 
 var app = express();
 
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors);
 
 app.use('/auth', auth);
+app.use('/tasks', tasks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

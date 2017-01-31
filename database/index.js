@@ -20,13 +20,22 @@ var sequelize = new Sequelize("postgres://kfpbxtlgixodfj:a161df8e9f0d23df9fc9aef
 var db = {
     Sequelize: Sequelize,
     sequelize: sequelize,
-    User:      sequelize.import('./models/user')
-    // add your other models here
+
+    User:      sequelize.import('./models/user'),
+    Task:      sequelize.import('./models/task'),
+
+    UserTask: sequelize.define('UserTask',{
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        }
+    })
 }
 
-    /*
-     Associations can be defined here. E.g. like this:
-     global.db.User.hasMany(global.db.SomethingElse)
-     */
+
+    db.User.belongsToMany(db.Task, { through: db.UserTask });
+    db.Task.belongsToMany(db.User, { through: db.UserTask });
+
 
 module.exports = db
