@@ -9,7 +9,8 @@ exports.create = function(req,res){
                 user.addTasks(task).then(function() {
                     res.json({                      //response with status 200
                         success: true,
-                        message: 'Task added to database!'
+                        message: 'Task added to database!',
+                        task: task
                     });
                 });
             })
@@ -18,6 +19,24 @@ exports.create = function(req,res){
             res.json({
                 success: false,
                 message: error
-        });
+            });
+        })
+};
+
+//get the list of tasks
+exports.getList = function(req,res){
+    Task.findAndCountAll({
+        attributes: ['id', 'name', 'description', 'date', 'time'],
+        include: {model: User, attributes: [],where:{
+            id:req.query.userID
+        }},
+        order: 'date ASC',
+        order: 'time ASC'
     })
+        .then(function(tasks) {
+            res.json({                      //response with status 200
+                success: true,
+                tasks: tasks.rows
+            });
+        })
 };
