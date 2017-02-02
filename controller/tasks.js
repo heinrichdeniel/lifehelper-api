@@ -5,7 +5,7 @@ var User   = require('../database').User;
 exports.create = function(req,res){
     Task.create({name: req.body.name, description: req.body.description, date: req.body.date, time: req.body.time})
         .then(function(task) {
-            User.findOne({where: {id: req.body.userID}}).then(function (user) {
+            User.findOne({where: {id: req.user.id}}).then(function (user) {
                 user.addTasks(task).then(function() {
                     res.json({                      //response with status 200
                         success: true,
@@ -28,7 +28,7 @@ exports.getList = function(req,res){
     Task.findAndCountAll({
         attributes: ['id', 'name', 'description', 'date', 'time'],
         include: {model: User, attributes: [],where:{
-            id:req.query.userID
+            id: req.user.id
         }},
         order: 'date ASC',
         order: 'time ASC'

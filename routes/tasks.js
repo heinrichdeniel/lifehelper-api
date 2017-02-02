@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var tasks = require('../controller/tasks.js');
+var checkToken = require('../middlewares/checkToken');
 
-router.get('/', tasks.getList);
+router.get('/', checkToken, tasks.getList);
 
-router.post('/', tasks.create);
+router.post('/', checkToken, tasks.create);
 
 module.exports = router;
