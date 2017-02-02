@@ -10,7 +10,7 @@ module.exports = function (req, res, next) {
         return res.status(401).json({success: false, message: 'Token is missing'});
     }
     try {
-        var decoded = jwt.decode(token, config.app.token);
+        var decoded = jwt.decode(token, config.jwt.secret);
     } catch (err) {
         return res.status(400).json({success: false, message: 'Invalid token', err: err.toString()});
     }
@@ -18,7 +18,7 @@ module.exports = function (req, res, next) {
     if (moment(decoded.exp).isBefore(moment())) {
         res.status(401).json({success: false, message: 'Expired token'});
     } else {
-        req.user = decoded.data;
+        req.user = decoded.iss;
         next();
     }
 };

@@ -1,12 +1,14 @@
 var jwt = require('jwt-simple');
 var config = require('../config')
+var moment = require('moment')
 
 module.exports = function (id , email) {
+    const expiration = moment().add(60 * 3, 'minutes').valueOf(); // Set expiration date for the token
     return jwt.encode({                    //creating the jwt.token
-        data: {
+        iss: {
             id: id,
             email: email
         },
-        exp: 60*60*3 // expires in 3 hours
+        exp : expiration
     },config.jwt.secret);
 };
