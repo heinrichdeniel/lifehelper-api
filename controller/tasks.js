@@ -26,7 +26,6 @@ exports.create = function(req,res){
 //get the list of tasks
 exports.getList = function(req,res){
     Task.findAndCountAll({
-        attributes: ['id', 'name', 'description', 'date', 'time'],
         include: {model: User, attributes: [],where:{
             id: req.user.id
         }},
@@ -37,6 +36,22 @@ exports.getList = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 tasks: tasks.rows
+            });
+        })
+};
+
+//get task by id
+exports.getTask = function(req,res){
+    Task.findOne({
+        where: {id: req.query.id},
+        include: {model: User, attributes: [],where:{
+            id: req.user.id
+        }}
+    })
+        .then(function(task) {
+            res.json({                      //response with status 200
+                success: true,
+                task: task
             });
         })
 };
