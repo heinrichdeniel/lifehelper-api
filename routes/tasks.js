@@ -7,6 +7,8 @@ router.get('/:id', checkToken, tasks.getTask);
 
 router.get('/', checkToken, tasks.getList);
 
+router.post('/delete/:id', checkToken, tasks.delete);
+
 router.post('/', checkToken, tasks.create);
 
 module.exports = router;

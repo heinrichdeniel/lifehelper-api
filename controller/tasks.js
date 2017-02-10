@@ -90,3 +90,21 @@ exports.getTask = function(req,res){
 
         })
 };
+
+//delete task
+exports.delete = function(req,res){
+    Task.findOne({
+        where: {id: req.body.id},
+        include: {model: User, attributes: [],where:{
+            id: req.user.id
+        }}
+    })
+        .then(function(task) {
+            task.updateAttributes({             //updating attributes
+                deleted:true
+            });
+            res.json({                      //response with status 200
+                success: true
+            });
+        })
+};
