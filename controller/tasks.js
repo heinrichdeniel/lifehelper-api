@@ -1,6 +1,8 @@
 var Task   = require('../database').Task;
 var User   = require('../database').User;
 
+var assignTaskToUser = require('../utils/assignTaskToUser');
+
 //creating a new task
 exports.create = function(req,res){
     if (req.body.id){           //if the task already exists
@@ -15,26 +17,36 @@ exports.create = function(req,res){
                     name: req.body.name,
                     description: req.body.description,
                     date: req.body.date,
-                    time: req.body.time
+                    time: req.body.time,
+                    location: req.body.location,
+                    lat: req.body.lat,
+                    lng: req.body.lng
                 });
                 res.json({                      //response with status 200
-                        success: true
+                        success: true,
+                        message: 'Task updated!',
+                        task: task
                     });
 
             })
     }
     else {          //creating the new task if it not exists
-        Task.create({name: req.body.name, description: req.body.description, date: req.body.date, time: req.body.time})
+        Task.create({
+            name: req.body.name,
+            description: req.body.description,
+            date: req.body.date,
+            time: req.body.time,
+            location: req.body.location,
+            lat: req.body.lat,
+            lng: req.body.lng
+        })
             .then(function(task) {
-                User.findOne({where: {id: req.user.id}}).then(function (user) {
-                    user.addTasks(task).then(function() {
-                        res.json({                      //response with status 200
-                            success: true,
-                            message: 'Task added to database!',
-                            task: task
-                        });
-                    });
-                })
+                assignTaskToUser(task, req.user.id);
+                res.json({                      //response with status 200
+                    success: true,
+                    message: 'Task added to database!',
+                    task: task
+                });
             })
             .catch(function(error){
                 res.json({

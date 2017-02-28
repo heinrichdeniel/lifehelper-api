@@ -7,8 +7,11 @@ module.exports = function(sequelize, DataTypes) {
         },
         name: DataTypes.STRING,
         description: DataTypes.TEXT,
-        date: DataTypes.DATEONLY,
+        date: DataTypes.DATE,
         time: DataTypes.STRING,
+        location: DataTypes.STRING,
+        lat: DataTypes.DOUBLE,
+        lng: DataTypes.DOUBLE,
         completed: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
