@@ -1,6 +1,7 @@
 var User   = require('../database').User;
 
 var generateToken = require('../utils/generateToken');       //this function return value will be the token returned to the client
+var addInitialProjects = require('../utils/addInitialProjects');
 
 exports.login = function(req,res){
     if (!req.body.email || !req.body.password){
@@ -37,12 +38,14 @@ exports.registration = function(req,res){
             User.create({username: req.body.username, email: req.body.email, password: req.body.password.toString('base64')})
                 .then(function(user2) {
                     var token = generateToken(user2.dataValues.id, user2.dataValues.email);
-                    res.json({                      //response with status 200
-                        success: true,
-                        message: 'Enjoy your token!',
-                        id: user2.dataValues.id,
-                        token: token
-                    });
+                    addInitialProjects(user2.dataValues.id).then (function(){
+                        res.json({                      //response with status 200
+                            success: true,
+                            message: 'Enjoy your token!',
+                            id: user2.dataValues.id,
+                            token: token
+                        });
+                    })
                 })
                 .catch(function(error){
                     res.json({
@@ -64,12 +67,15 @@ exports.loginFacebook = function(req,res){
             User.create({ facebook_id:  req.body.facebook_id, username: req.body.name, email: req.body.email, photo_url: req.body.photo_url })
                 .then(function(user2) {
                     var token = generateToken(user2.dataValues.id, user2.dataValues.email);
-                    res.json({                      //response with status 200
-                        success: true,
-                        message: 'Enjoy your token!',
-                        id: user2.dataValues.id,
-                        token: token
-                    });
+                    addInitialProjects(user2.dataValues.id).then (function(){
+
+                        res.json({                      //response with status 200
+                            success: true,
+                            message: 'Enjoy your token!',
+                            id: user2.dataValues.id,
+                            token: token
+                        });
+                    })
                 })
                 .catch(function(error){
                     res.json({
@@ -107,12 +113,14 @@ exports.loginGoogle = function(req,res){
             User.create({ google_id:  req.body.google_id, username: req.body.name, email: req.body.email, photo_url: req.body.photo_url })
                 .then(function(user2) {
                     var token = generateToken(user2.dataValues.id, user2.dataValues.email);
-                    res.json({                      //response with status 200
-                        success: true,
-                        message: 'Enjoy your token!',
-                        id: user2.dataValues.id,
-                        token: token
-                    });
+                    addInitialProjects(user2.dataValues.id).then (function(){
+                        res.json({                      //response with status 200
+                            success: true,
+                            message: 'Enjoy your token!',
+                            id: user2.dataValues.id,
+                            token: token
+                        });
+                    })
                 })
                 .catch(function(error){
                     res.json({

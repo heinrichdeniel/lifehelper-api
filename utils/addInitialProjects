@@ -1,0 +1,14 @@
+var Project   = require('../database').Project;
+var User   = require('../database').User;
+
+module.exports = function (userId) {
+    return Project.findAll({where: {initialProject: true}}).then(function (projects){      //get initial projects from database
+            return User.findOne({where: {id: userId}}).then(function (user) {     //get user from database
+                return projects.map(function (project,index){
+                    user.addProjects(project);              //add projects to user
+                });
+            });
+        });
+
+};
+

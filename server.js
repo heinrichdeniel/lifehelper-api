@@ -6,6 +6,7 @@ var debug = require('debug')('node-sequelize-postgresql');
 var db = require('./database');
 var auth = require('./routes/auth');
 var tasks = require('./routes/tasks');
+var projects = require('./routes/projects');
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use(cors);
 
 app.use('/auth', auth);
 app.use('/tasks', tasks);
+app.use('/projects', projects);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -32,6 +34,7 @@ app.use(function(req, res, next) {
 var PORT = process.env.PORT || 5000;
 
 db.sequelize.sync().then(function() {
+    db.createInitialProjects();
     app.listen(PORT, function () {
         debug('API container started on port ' + PORT);
     });

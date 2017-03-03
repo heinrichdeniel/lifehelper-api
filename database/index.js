@@ -1,5 +1,3 @@
-var database = require('../config').database;
-
 var Sequelize = require("sequelize");
 var sequelize = new Sequelize("postgres://kfpbxtlgixodfj:a161df8e9f0d23df9fc9aef8765d3456024ec236d722ef92a90596eaab4ebd5f@ec2-79-125-13-42.eu-west-1.compute.amazonaws.com:5432/d83i7i03aae4ve" ,{
     dialect: 'postgres',
@@ -23,19 +21,47 @@ var db = {
 
     User:      sequelize.import('./models/user'),
     Task:      sequelize.import('./models/task'),
+    Project:   sequelize.import('./models/project'),
 
-    UserTask: sequelize.define('UserTask',{
+    UserTask: sequelize.define('UserTask',{     //n-m relation table between User and Task
+        id: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        }
+    }),
+
+    UserProject: sequelize.define('UserProject',{       //n-m relation table between Project and User
         id: {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
         }
     })
-}
+};
 
 
-    db.User.belongsToMany(db.Task, { through: db.UserTask });
-    db.Task.belongsToMany(db.User, { through: db.UserTask });
+db.User.belongsToMany(db.Task,  { through: db.UserTask });
+db.Task.belongsToMany(db.User, { through: db.UserTask });
+db.User.belongsToMany(db.Project, { through: db.UserProject });
+db.Project.belongsToMany(db.User, { through: db.UserProject });
+db.Project.hasMany(db.Task);
+db.Task.belongsTo(db.Project);
 
 
-module.exports = db
+               //creating the initial projects
+db.createInitialProjects = function(){
+    db.Project.findAll().then(function(count){
+        if (count == 0){
+            db.Project.bulkCreate([
+                { name: 'Personal', initialProject: true, color:'#0a00ea'},
+                { name: 'Work', initialProject: true, color:'#def11c' },
+                { name: 'School', initialProject: true, color:'#921497' }
+            ])
+        }
+    })
+};
+
+
+
+module.exports = db;
