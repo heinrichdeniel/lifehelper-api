@@ -2,13 +2,21 @@ var Project   = require('../database').Project;
 var User   = require('../database').User;
 
 module.exports = function (userId) {
-    return Project.findAll({where: {initialProject: true}}).then(function (projects){      //get initial projects from database
+    return Project.bulkCreate([                 //creating three initial project
+        { name: 'Personal', initialProject: true, color:'#0a00ea', createdBy: userId},
+        { name: 'Work', initialProject: true, color:'#def11c', createdBy: userId },
+        { name: 'School', initialProject: true, color:'#921497', createdBy: userId }
+    ]).then(function(){
+        return Project.findAll({
+            where:{createdBy:userId}
+        }).then(function(projects){
             return User.findOne({where: {id: userId}}).then(function (user) {     //get user from database
-                return projects.map(function (project,index){
+                return projects.map(function (project){
                     user.addProjects(project);              //add projects to user
                 });
             });
         });
 
+    })
 };
 

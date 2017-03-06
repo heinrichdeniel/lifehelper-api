@@ -6,10 +6,15 @@ module.exports = function(sequelize, DataTypes) {
             autoIncrement: true
         },
         name: DataTypes.STRING,
+        color: DataTypes.STRING,
         initialProject: {
             type: DataTypes.BOOLEAN,
-            color: DataTypes.STRING,
             defaultValue: false
-        }
+        },
+        deleted:{
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        createdBy:DataTypes.INTEGER
     })
 };

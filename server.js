@@ -34,7 +34,6 @@ app.use(function(req, res, next) {
 var PORT = process.env.PORT || 5000;
 
 db.sequelize.sync().then(function() {
-    db.createInitialProjects();
     app.listen(PORT, function () {
         debug('API container started on port ' + PORT);
     });

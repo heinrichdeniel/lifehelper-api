@@ -36,6 +36,10 @@ var db = {
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true
+        },
+        deleted:{
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
     })
 };
@@ -45,23 +49,7 @@ db.User.belongsToMany(db.Task,  { through: db.UserTask });
 db.Task.belongsToMany(db.User, { through: db.UserTask });
 db.User.belongsToMany(db.Project, { through: db.UserProject });
 db.Project.belongsToMany(db.User, { through: db.UserProject });
-db.Project.hasMany(db.Task);
+db.Project.hasMany(db.Task, { onDelete: 'cascade' });
 db.Task.belongsTo(db.Project);
-
-
-               //creating the initial projects
-db.createInitialProjects = function(){
-    db.Project.findAll().then(function(count){
-        if (count == 0){
-            db.Project.bulkCreate([
-                { name: 'Personal', initialProject: true, color:'#0a00ea'},
-                { name: 'Work', initialProject: true, color:'#def11c' },
-                { name: 'School', initialProject: true, color:'#921497' }
-            ])
-        }
-    })
-};
-
-
 
 module.exports = db;

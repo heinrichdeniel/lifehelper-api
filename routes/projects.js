@@ -5,6 +5,8 @@ var checkToken = require('../middlewares/checkToken');
 
 router.get('/', checkToken, projects.getList);
 
+router.post('/delete/:id', checkToken, projects.delete);
+
 router.post('/', checkToken, projects.create);
 
 module.exports = router;

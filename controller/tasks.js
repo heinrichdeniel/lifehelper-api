@@ -6,7 +6,6 @@ var assignTaskToUser = require('../utils/assignTaskToUser');
 
 //creating a new task
 exports.create = function(req,res){
-    var projectId = req.body.ProjectId!="0" ? req.body.ProjectId : null;
 
     if (req.body.id){           //if the task already exists
         Task.findOne({                      //get task by id
@@ -28,7 +27,7 @@ exports.create = function(req,res){
                     location: req.body.location,
                     lat: req.body.lat,
                     lng: req.body.lng,
-                    ProjectId: projectId,
+                    ProjectId: req.body.ProjectId,
                 }).then (function (){
                     Task.findOne({                      //get task by id
                         where: {id: req.body.id},
@@ -59,7 +58,7 @@ exports.create = function(req,res){
             location: req.body.location,
             lat: req.body.lat,
             lng: req.body.lng,
-            ProjectId: projectId
+            ProjectId: req.body.ProjectId
 
         })
             .then(function(task) {
@@ -80,6 +79,7 @@ exports.create = function(req,res){
             })
             .catch(function(error){
                 res.json({
+
                     success: false,
                     message: error
                 });

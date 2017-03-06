@@ -1,0 +1,9 @@
+var User   = require('../database').User;
+
+module.exports = function (project , userId) {
+    User.findOne({where: {id: userId}}).then(function (user) {     //creating relation between Task - User
+        user.addProjects(project).then(function (){
+            return true;
+        });
+    });
+};
