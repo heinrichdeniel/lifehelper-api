@@ -13,6 +13,10 @@ module.exports = function(sequelize, DataTypes) {
             unique: true
         },
         password: DataTypes.STRING,
+        language: {
+            type: DataTypes.STRING,
+            defaultValue: "en"
+        },
         google_id: {
             type: DataTypes.STRING,
             unique: true

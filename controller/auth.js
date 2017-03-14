@@ -18,7 +18,7 @@ exports.login = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
-                id: user.dataValues.id,
+                user: user,
                 token: token
             });
         }
@@ -42,7 +42,7 @@ exports.registration = function(req,res){
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
-                            id: user2.dataValues.id,
+                            user: user2,
                             token: token
                         });
                     })
@@ -72,7 +72,7 @@ exports.loginFacebook = function(req,res){
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
-                            id: user2.dataValues.id,
+                            user: user2,
                             token: token
                         });
                     })
@@ -95,7 +95,7 @@ exports.loginFacebook = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
-                id: user.dataValues.id,
+                user: user,
                 token: token
             });
         }
@@ -117,7 +117,7 @@ exports.loginGoogle = function(req,res){
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
-                            id: user2.dataValues.id,
+                            user: user2,
                             token: token
                         });
                     })
@@ -140,8 +140,25 @@ exports.loginGoogle = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
-                id: user.dataValues.id,
+                user: user,
                 token: token
+            });
+        }
+    })
+}
+
+exports.getProfile = function(req,res){
+    User.findOne({where:{id: req.user.id}}).then(function(user){
+        if (!user ){                 //if the user not exists in the database
+            res.json({
+                success: false,
+                message: "User not exists!"
+            });
+        }
+        else {
+            res.json({                      //response with status 200
+                success: true,
+                user: user
             });
         }
     })
