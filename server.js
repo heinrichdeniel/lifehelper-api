@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var cors = require('./middlewares/cors');
 var debug = require('debug')('node-sequelize-postgresql');
 var db = require('./database');
-var auth = require('./routes/auth');
+var user = require('./routes/user');
 var tasks = require('./routes/tasks');
 var projects = require('./routes/projects');
 
@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors);
 
-app.use('/auth', auth);
+app.use('/user', user);
 app.use('/tasks', tasks);
 app.use('/projects', projects);
 

@@ -83,7 +83,7 @@ exports.loginFacebook = function(req,res){
                         message: error
                     });
                 })
-            }
+        }
         else {
             if (!user.dataValues.facebook_id){  //if the user not logged in with fb until now
                 user.updateAttributes({
@@ -162,4 +162,23 @@ exports.getProfile = function(req,res){
             });
         }
     })
+}
+
+exports.updateGeneralSettings = function(req,res){
+    User.findOne({                      //get user by id
+        where: {id: req.user.id}
+    })
+        .then(function(user) {
+            user.updateAttributes({             //updating attributes
+                language: req.body.language,
+                dateFormat: req.body.dateFormat,
+                timeFormat: req.body.timeFormat
+            }).then (function () {
+
+                res.json({                      //response with status 200
+                    success: true,
+                    user: user
+                });
+            });
+        });
 }

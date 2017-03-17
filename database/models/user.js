@@ -17,6 +17,14 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.STRING,
             defaultValue: "en"
         },
+        dateFormat: {
+            type: DataTypes.STRING,
+            defaultValue: "DD/MM/YYYY"
+        },
+        timeFormat: {
+            type: DataTypes.STRING,
+            defaultValue: "HH:mm"
+        },
         google_id: {
             type: DataTypes.STRING,
             unique: true
