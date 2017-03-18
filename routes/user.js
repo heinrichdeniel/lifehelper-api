@@ -13,6 +13,8 @@ router.post('/registration', user.registration);
 
 router.post('/updateGeneralSettings', checkToken, user.updateGeneralSettings);
 
+router.post('/updateAccountSettings', checkToken, user.updateAccountSettings);
+
 router.get('/profile', checkToken, user.getProfile);
 
 

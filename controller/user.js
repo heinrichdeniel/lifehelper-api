@@ -169,16 +169,55 @@ exports.updateGeneralSettings = function(req,res){
         where: {id: req.user.id}
     })
         .then(function(user) {
-            user.updateAttributes({             //updating attributes
-                language: req.body.language,
-                dateFormat: req.body.dateFormat,
-                timeFormat: req.body.timeFormat
-            }).then (function () {
-
+            var newUser = {
+                language: req.body.language
+            }
+            if (req.body.dateFormat){
+                newUser['dateFormat'] = req.body.dateFormat;
+            }
+            if (req.body.timeFormat){
+                newUser['timeFormat'] = req.body.timeFormat;
+            }
+            user.updateAttributes(newUser).then (function () {
                 res.json({                      //response with status 200
                     success: true,
                     user: user
                 });
             });
         });
+}
+
+exports.updateAccountSettings = function(req,res){
+    User.findOne({                      //    check if the email already exists in the database
+        where: {email: req.body.email, id: {$ne :req.user.id}}
+    })
+        .then(function(exists) {
+            if (exists){
+                res.json({
+                    success: false,
+                    message: "Email already in use!"
+                });
+            }
+            else{
+                User.findOne({                      //if not then get user by id
+                    where: {id: req.user.id}
+                })
+                    .then(function(user) {
+                        var newUser = {
+                            username: req.body.username,
+                            email: req.body.email
+                        };
+                        if (req.body.newPassword){
+                            newUser['password'] = req.body.newPassword;
+                        }
+                        user.updateAttributes( newUser ).then (function () {
+                            res.json({                      //response with status 200
+                                success: true,
+                                user: user
+                            });
+                        });
+                    });
+            }
+        });
+
 }
