@@ -92,7 +92,8 @@ exports.delete = function(req,res){
     })
         .then(function() {
             res.json({                      //response with status 200
-                success: true
+                success: true,
+                projectId: req.body.id
             });
         })
 };
