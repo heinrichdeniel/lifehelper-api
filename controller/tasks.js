@@ -19,6 +19,10 @@ exports.create = function(req,res){
             ]
         })
             .then(function(task) {
+                var completedAt = null;  /*the date when the task was completed*/
+                if (req.body.completed){
+                    completedAt = new Date();
+                }
                 task.updateAttributes({             //updating attributes
                     name: req.body.name,
                     description: req.body.description,
@@ -28,6 +32,9 @@ exports.create = function(req,res){
                     lat: req.body.lat,
                     lng: req.body.lng,
                     ProjectId: req.body.ProjectId,
+                    completed: req.body.completed,
+                    completedAt: completedAt,
+                    archived: req.body.archived
                 }).then (function (){
                     Task.findOne({                      //get task by id
                         where: {id: req.body.id},
@@ -88,7 +95,7 @@ exports.create = function(req,res){
 
 };
 
-//get the list of tasks
+//get the list of tasks where completed, deleted and archived fields = false
 exports.getList = function(req,res){
     Task.findAndCountAll({
         include:[
@@ -97,6 +104,38 @@ exports.getList = function(req,res){
             }},
             {model: Project}
         ] ,
+        where:{
+            completed: {$ne: true},
+            deleted: {$ne: true},
+            archived: {$ne: true}
+        },
+        order: [
+            ['date', 'ASC'],
+            ['time', 'ASC']
+        ]
+    })
+        .then(function(tasks) {
+            res.json({                      //response with status 200
+                success: true,
+                tasks: tasks.rows
+            });
+        })
+};
+
+exports.getArchive = function(req,res){         //get tasks, where archived = true or completed = true
+    Task.findAndCountAll({
+        include:[
+            {model: User, attributes: [],where:{
+                id: req.user.id
+            }},
+            {model: Project}
+        ] ,
+        where:{
+            $or: {
+                completed:  true,
+                archived:  true
+            }
+        },
         order: [
             ['date', 'ASC'],
             ['time', 'ASC']

@@ -15,6 +15,10 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
+        archived: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
         createdBy:DataTypes.INTEGER
     })
 };

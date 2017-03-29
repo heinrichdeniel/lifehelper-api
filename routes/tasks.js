@@ -3,6 +3,8 @@ var router = express.Router();
 var tasks = require('../controller/tasks.js');
 var checkToken = require('../middlewares/checkToken');
 
+router.get('/archive', checkToken, tasks.getArchive);
+
 router.get('/:id', checkToken, tasks.getTask);
 
 router.get('/', checkToken, tasks.getList);

@@ -12,7 +12,12 @@ module.exports = function(sequelize, DataTypes) {
         location: DataTypes.STRING,
         lat: DataTypes.DOUBLE,
         lng: DataTypes.DOUBLE,
+        completedAt: DataTypes.DATE,
         completed: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        },
+        archived: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
