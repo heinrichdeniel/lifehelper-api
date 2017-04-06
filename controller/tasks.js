@@ -1,12 +1,12 @@
 var Task   = require('../database').Task;
 var User   = require('../database').User;
+var UserTask   = require('../database').UserTask;
 var Project   = require('../database').Project;
 
 var assignTaskToUser = require('../utils/assignTaskToUser');
 
 //creating a new task
 exports.create = function(req,res){
-
     if (req.body.id){           //if the task already exists
         Task.findOne({                      //get task by id
             where: {id: req.body.id},
@@ -20,7 +20,7 @@ exports.create = function(req,res){
         })
             .then(function(task) {
                 var completedAt = null;  /*the date when the task was completed*/
-                if (req.body.completed){
+                if (req.body.status == 'completed'||req.body.status == 'archived'){
                     completedAt = new Date();
                 }
                 task.updateAttributes({             //updating attributes
@@ -32,9 +32,8 @@ exports.create = function(req,res){
                     lat: req.body.lat,
                     lng: req.body.lng,
                     ProjectId: req.body.ProjectId,
-                    completed: req.body.completed,
-                    completedAt: completedAt,
-                    archived: req.body.archived
+                    status: req.body.status,
+                    completedAt: completedAt
                 }).then (function (){
                     Task.findOne({                      //get task by id
                         where: {id: req.body.id},
@@ -65,7 +64,8 @@ exports.create = function(req,res){
             location: req.body.location,
             lat: req.body.lat,
             lng: req.body.lng,
-            ProjectId: req.body.ProjectId
+            ProjectId: req.body.ProjectId,
+            owner: req.user.id
 
         })
             .then(function(task) {
@@ -99,15 +99,21 @@ exports.create = function(req,res){
 exports.getList = function(req,res){
     Task.findAndCountAll({
         include:[
-            {model: User, attributes: [],where:{
-                id: req.user.id
-            }},
+            {
+                model: UserTask,
+                where: {
+                    UserId: req.user.id,
+                    $and: [
+                        {shareStatus: {$ne: "pending"}},
+                        {shareStatus: {$ne: "declined"}}
+                    ]
+
+                }
+            },
             {model: Project}
         ] ,
         where:{
-            completed: {$ne: true},
-            deleted: {$ne: true},
-            archived: {$ne: true}
+            status: "pending"
         },
         order: [
             ['date', 'ASC'],
@@ -131,10 +137,7 @@ exports.getArchive = function(req,res){         //get tasks, where archived = tr
             {model: Project}
         ] ,
         where:{
-            $or: {
-                completed:  true,
-                archived:  true
-            }
+            status:  {$in:[ 'completed', 'archived']}
         },
         order: [
             ['date', 'ASC'],
@@ -188,11 +191,81 @@ exports.delete = function(req,res){
     })
         .then(function(task) {
             task.updateAttributes({             //updating attributes
-                deleted:true
+                status: 'deleted'
             });
             res.json({                      //response with status 200
                 success: true
             });
         })
+};
+
+//if the user want to share a task with other user(s)
+exports.shareTask = function(req,res){
+    req.body.users.map( function(user) {
+        UserTask.create({
+            UserId: user.value,
+            TaskId: req.body.task.id,
+            shareStatus: "pending",
+            sharedBy: req.user.id
+        }).catch(function (e) {
+            res.json({                      //response with status 200
+                success: false
+            });
+        });
+        User.findOne({
+            where: {id: user.value}
+        })
+            .then(function (user) {
+                if (!user.notifications){
+                    user.updateAttributes({             //the user now have notifications
+                        notifications: true
+                    });
+                }
+            });
+    });
+    Task.findOne({
+        where: {id: req.body.task.id}
+    })
+        .then(function(task) {
+            task.updateAttributes({             //updating attributes
+                shared: true
+            });
+            res.json({                      //response with status 200
+                success: true,
+                task: task
+            });
+        })
+};
+
+//if the user accepted the shared task
+exports.acceptShare = function(req,res){
+    UserTask.findOne({
+        where: {UserId: req.user.id, TaskId: req.body.taskId}
+    })
+        .then(function(userTask){
+            userTask.updateAttributes({
+                shareStatus: "accepted"
+            }).then(function() {
+                res.json({
+                    success: true
+                });
+            });
+        });
+};
+
+//if the user declined the shared task
+exports.declineShare = function(req,res){
+    UserTask.findOne({
+        where: {UserId: req.user.id, TaskId: req.body.taskId}
+    })
+        .then(function(userTask){
+            userTask.updateAttributes({
+                shareStatus: "declined"
+            }).then(function() {
+                res.json({
+                    success: true
+                });
+            });
+        });
 };
 

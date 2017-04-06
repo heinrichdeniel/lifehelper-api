@@ -1,4 +1,8 @@
 var User   = require('../database').User;
+var Project   = require('../database').Project;
+var UserTask   = require('../database').UserTask;
+var Task   = require('../database').Task;
+var sequelize   = require('../database').sequelize;
 
 var generateToken = require('../utils/generateToken');       //this function return value will be the token returned to the client
 var addInitialProjects = require('../utils/addInitialProjects');
@@ -205,7 +209,7 @@ exports.updateAccountSettings = function(req,res){
                     .then(function(user) {
                         var newUser = {
                             username: req.body.username,
-                            email: req.body.email
+                            email: req.body.email,
                         };
                         if (req.body.newPassword){
                             newUser['password'] = req.body.newPassword;
@@ -219,5 +223,88 @@ exports.updateAccountSettings = function(req,res){
                     });
             }
         });
+}
 
+exports.getListByFilter = function(req,res){
+    User.findAll({
+        attributes: ['id', 'username', 'email', 'photo_url'],
+        include: {
+            model: Task, attributes: ['id'], through: {
+                attributes: []
+            }
+        },
+        where: {
+            $or:[
+                sequelize.where(sequelize.fn('lower', sequelize.col('email')), {$like: sequelize.fn('lower', req.query.filter+"%")}),
+                sequelize.where(sequelize.fn('lower', sequelize.col('username')), {$like: sequelize.fn('lower', req.query.filter+"%")}),
+            ],
+            id: {$ne: req.user.id}
+        }
+    })
+        .then(function(users) {
+            res.json({                      //response with status 200
+                success: true,
+                users: users,
+                taskId: req.query.taskId
+            });
+        });
+}
+
+exports.getCollaborators = function(req,res){       //return collaborators of task or project
+    User.findAll({
+        attributes: ['id', 'username', 'email', 'photo_url'],
+        include: {
+            model: Task, attributes: ['id','owner'], where: {id: req.query.taskId},through: {
+                attributes: ['shareStatus','sharedBy']
+            }
+        },
+        where: {
+            id: {$ne: req.user.id}
+        }
+    })
+        .then(function(users) {
+            res.json({                      //response with status 200
+                success: true,
+                users: users
+            });
+        });
+}
+
+exports.getNotifications = function(req,res){       //return the tasks where the user got share request
+    User.findOne({
+        where: {id: req.user.id}
+    })
+        .then(function (user) {
+            if (user.notifications){
+                user.updateAttributes({             //the user now have notifications
+                    notifications: false
+                });
+            }
+
+        });
+    Task.findAll({
+        include: [
+            {
+                model: UserTask,
+                attributes: ['shareStatus'],
+                where: {UserId: req.user.id, shareStatus: "pending"},
+                include: {
+                    model: User,
+                    as: 'sharedUser'
+                }
+            },
+            {
+                model: Project,
+                attributes: ['name'],
+            }
+        ],
+    })
+        .then(function(tasks) {
+            res.json({                      //response with status 200
+                success: true,
+                notifications: {
+                    tasks: tasks
+                }
+            });
+        });
 }

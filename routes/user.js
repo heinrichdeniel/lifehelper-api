@@ -17,5 +17,11 @@ router.post('/updateAccountSettings', checkToken, user.updateAccountSettings);
 
 router.get('/profile', checkToken, user.getProfile);
 
+router.get('/list', checkToken, user.getListByFilter);
+
+router.get('/collaborators', checkToken, user.getCollaborators);
+
+router.get('/notifications', checkToken, user.getNotifications);
+
 
 module.exports = router;

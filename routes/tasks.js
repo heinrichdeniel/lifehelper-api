@@ -9,6 +9,12 @@ router.get('/:id', checkToken, tasks.getTask);
 
 router.get('/', checkToken, tasks.getList);
 
+router.post('/share', checkToken, tasks.shareTask);
+
+router.post('/acceptShare', checkToken, tasks.acceptShare);
+
+router.post('/declineShare', checkToken, tasks.declineShare);
+
 router.post('/delete/:id', checkToken, tasks.delete);
 
 router.post('/', checkToken, tasks.create);

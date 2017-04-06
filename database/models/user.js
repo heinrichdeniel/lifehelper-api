@@ -37,6 +37,10 @@ module.exports = function(sequelize, DataTypes) {
         deleted: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
+        },
+        notifications: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     })
 };

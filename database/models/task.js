@@ -13,17 +13,14 @@ module.exports = function(sequelize, DataTypes) {
         lat: DataTypes.DOUBLE,
         lng: DataTypes.DOUBLE,
         completedAt: DataTypes.DATE,
-        completed: {
+        status: {
+            type: DataTypes.STRING,
+            defaultValue: "pending"
+        },
+        shared: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        archived: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        deleted: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        }
+        owner: DataTypes.INTEGER
     })
 };
