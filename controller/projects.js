@@ -4,6 +4,9 @@ var UserProject   = require('../database').UserProject;
 
 var assignProjectToUser = require('../utils/assignProjectToUser');
 var setProjectToUnshared = require('../utils/setProjectToUnshared');
+var shareTasksOfProject = require('../utils/shareTasksOfProject');
+var deleteTasksOfProject = require('../utils/deleteTasksOfProject');
+var completeTasksOfProject = require('../utils/completeTasksOfProject');
 
 //create or update a project
 exports.create = function(req,res){
@@ -15,8 +18,15 @@ exports.create = function(req,res){
             }}
         })
             .then(function(project) {
+                var completedAt = null;  /*the date when the task was completed*/
+                if (req.body.status == 'completed'||req.body.status == 'archived'){
+                    completedAt = new Date();
+                    completeTasksOfProject(req.body.id, req.body.status, completedAt);
+                }
                 project.updateAttributes({             //updating attributes
-                    name: req.body.name
+                    name: req.body.name,
+                    status: req.body.status,
+                    completedAt: completedAt
                 });
                 res.json({                      //response with status 200
                     success: true,
@@ -42,7 +52,8 @@ exports.create = function(req,res){
             }
             else{
                 Project.create({
-                    name: req.body.name
+                    name: req.body.name,
+                    owner: req.user.id
                 })
                     .then(function (project) {
                         assignProjectToUser(project, req.user.id);
@@ -79,12 +90,10 @@ exports.getList = function(req,res){
 
             }
         },
+
         order: [
             ['name', 'ASC']
-        ],
-        where:{
-            status: "pending"
-        }
+        ]
     })
         .then(function(projects) {
             res.json({                      //response with status 200
@@ -100,6 +109,7 @@ exports.delete = function(req,res){
         where: {UserId: req.user.id, ProjectId: req.body.id}
     })
         .then(function() {
+            deleteTasksOfProject(req.user.id, req.body.id)
             setProjectToUnshared(req.body.id)
             res.json({                      //response with status 200
                 success: true,
@@ -169,6 +179,7 @@ exports.acceptShare = function(req,res){
             userProject.updateAttributes({
                 shareStatus: "accepted"
             }).then(function() {
+                shareTasksOfProject(req.user.id, req.body.projectId, userProject.sharedBy);
                 res.json({
                     success: true
                 });

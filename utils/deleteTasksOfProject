@@ -1,0 +1,22 @@
+var UserTask   = require('../database').UserTask;
+var Task   = require('../database').Task;
+
+var setTaskToUnshared = require("./setTaskToUnshared");
+
+module.exports = function (userId, projectId) {
+    Task.findAll(         //get all tasks of the project
+        {
+            where: {ProjectId: projectId}
+        }
+    )
+        .then(function(tasks){
+            tasks.map(function (task){
+                UserTask.destroy({
+                    where: {UserId: userId, TaskId: task.id}
+                }).then(function(){
+                    setTaskToUnshared(task.id)
+                })
+            })
+
+        })
+};

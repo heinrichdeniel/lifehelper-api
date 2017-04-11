@@ -4,7 +4,7 @@ var Project   = require('../database').Project;
 module.exports = function (projectId) {
     UserProject.count(         //check if remained at least one collaborator
         {
-            where: {TaskId: projectId ,shareStatus: {$ne: "deleted"}}
+            where: {ProjectId: projectId ,shareStatus: {$ne: "deleted"}}
         }
     )
         .then(function(count){

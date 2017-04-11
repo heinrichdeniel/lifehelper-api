@@ -1,0 +1,21 @@
+var UserProject   = require('../database').UserProject;
+var UserTask   = require('../database').UserTask;
+
+module.exports = function (task, sharedBy) {
+
+    UserProject.findAll({
+        where: {
+            ProjectId: task.ProjectId,
+            UserId: {$ne: sharedBy}
+        }
+    }).then(function (users) {     //creating relation between Task - User
+        users.map( function(user){
+            UserTask.create({
+                UserId: user.UserId,
+                TaskId: task.id,
+                shareStatus: "accepted",
+                sharedBy: sharedBy
+            })
+        })
+    });
+};

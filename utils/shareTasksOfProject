@@ -1,0 +1,38 @@
+var UserTask   = require('../database').UserTask;
+var Task   = require('../database').Task;
+
+module.exports = function (userId, projectId, sharedBy) {
+    Task.findAll(         //get all tasks of the project
+        {
+            where: {ProjectId: projectId}
+        }
+    )
+        .then(function(tasks){
+            tasks.map(function (task){
+                Task.findOne( {where: {id: task.id} }).then(function(oneTask){
+                    oneTask.updateAttributes({shared: true})
+                });
+
+
+                UserTask.findOne({
+                    where: {UserId: userId, TaskId: task.id}
+                })
+                    .then(function(userTask){
+                        if (!userTask){
+                            UserTask.create({
+                                UserId: userId,
+                                TaskId: task.id,
+                                shareStatus: "accepted",
+                                sharedBy: sharedBy
+                            })
+                        }
+                        else{
+                            userTask.updateAttributes({
+                                shareStatus: "accepted"
+                            })
+                        }
+                    });
+            })
+
+        })
+};

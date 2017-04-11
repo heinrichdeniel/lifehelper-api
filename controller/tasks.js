@@ -5,6 +5,7 @@ var Project   = require('../database').Project;
 
 var assignTaskToUser = require('../utils/assignTaskToUser');
 var setTaskToUnshared = require('../utils/setTaskToUnshared');
+var assignTaskToCollaborators = require('../utils/assignTaskToCollaborators');
 
 //creating a new task
 exports.create = function(req,res){
@@ -78,6 +79,10 @@ exports.create = function(req,res){
                         {model: Project}
                     ]
                 }).then(function(task) {
+                    if (task.Project.shared){           //if the selected project is shared with other users
+                        assignTaskToCollaborators(task,req.user.id);
+                        task.updateAttributes({shared: true})
+                    }
                     res.json({                      //response with status 200
                         success: true,
                         message: 'Task added to database!',

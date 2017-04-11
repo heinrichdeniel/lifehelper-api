@@ -19,6 +19,7 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
+        completedAt: DataTypes.DATE,
         owner: DataTypes.INTEGER
     })
 };

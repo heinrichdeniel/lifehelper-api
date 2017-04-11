@@ -1,0 +1,17 @@
+var Task   = require('../database').Task;
+
+module.exports = function (projectId, status, completedAt) {
+
+    Task.findAll({
+        where: {
+            ProjectId: projectId
+        }
+    }).then(function (tasks) {
+        tasks.map( function(task){
+            task.updateAttributes({
+                status: status,
+                completedAt: completedAt
+            })
+        })
+    });
+};
