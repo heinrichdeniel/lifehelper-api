@@ -1,9 +1,9 @@
 var Project   = require('../database').Project;
 var User   = require('../database').User;
-var Task   = require('../database').Task;
+var UserProject   = require('../database').UserProject;
 
 var assignProjectToUser = require('../utils/assignProjectToUser');
-
+var setProjectToUnshared = require('../utils/setProjectToUnshared');
 
 //create or update a project
 exports.create = function(req,res){
@@ -67,14 +67,23 @@ exports.create = function(req,res){
 //get the list of projects
 exports.getList = function(req,res){
     Project.findAndCountAll({
-        include: {model: User, attributes: [],where:{
-            id: req.user.id
-        }},
+        include: {
+            model: UserProject,
+            where: {
+                UserId: req.user.id,
+                $and: [
+                    {shareStatus: {$ne: "pending"}},
+                    {shareStatus: {$ne: "declined"}},
+                    {shareStatus: {$ne: "deleted"}}
+                ]
+
+            }
+        },
         order: [
             ['name', 'ASC']
         ],
         where:{
-            deleted:{$ne: true}
+            status: "pending"
         }
     })
         .then(function(projects) {
@@ -87,13 +96,129 @@ exports.getList = function(req,res){
 
 //delete project
 exports.delete = function(req,res){
-    Project.destroy({                                               //delete the project
-        where: {id: req.body.id }
+    UserProject.destroy({                                               //delete the project
+        where: {UserId: req.user.id, ProjectId: req.body.id}
     })
         .then(function() {
+            setProjectToUnshared(req.body.id)
             res.json({                      //response with status 200
                 success: true,
                 projectId: req.body.id
             });
+        })
+};
+
+
+//if the user want to share a whole project with other user(s)
+exports.shareProject = function(req,res){
+    req.body.users.map( function(user) {
+        UserProject.findOne({
+            where: {UserId: user.value, ProjectId: req.body.project.id}
+        })
+            .then(function(userProject){
+                if (!userProject){
+                    UserProject.create({
+                        UserId: user.value,
+                        ProjectId: req.body.project.id,
+                        shareStatus: "pending",
+                        sharedBy: req.user.id
+                    }).catch(function () {
+                        res.json({                      //response with status 200
+                            success: false
+                        });
+                    });
+                }
+                else{
+                    userProject.updateAttributes({
+                        shareStatus: "pending"
+                    })
+                }
+            });
+
+        User.findOne({
+            where: {id: user.value}
+        })
+            .then(function (user) {
+                if (!user.notifications){
+                    user.updateAttributes({             //the user now have notifications
+                        notifications: true
+                    });
+                }
+            });
+    });
+    Project.findOne({
+        where: {id: req.body.project.id}
+    })
+        .then(function(project) {
+            project.updateAttributes({             //updating attributes
+                shared: true
+            });
+            res.json({                      //response with status 200
+                success: true,
+                project: project
+            });
+        })
+};
+
+//if the user accepted the shared project
+exports.acceptShare = function(req,res){
+    UserProject.findOne({
+        where: {UserId: req.user.id, ProjectId: req.body.projectId}
+    })
+        .then(function(userProject){
+            userProject.updateAttributes({
+                shareStatus: "accepted"
+            }).then(function() {
+                res.json({
+                    success: true
+                });
+            });
+        });
+};
+
+//if the user declined the shared project
+exports.declineShare = function(req,res){
+    UserProject.findOne({
+        where: {UserId: req.user.id, ProjectId: req.body.projectId}
+    })
+        .then(function(userProject){
+            userProject.updateAttributes({
+                shareStatus: "declined"
+            }).then(function() {
+                setProjectToUnshared(req.body.projectId)
+                res.json({
+                    success: true
+                });
+            });
+        });
+};
+
+
+//if the user want to remove the share
+exports.removeShare = function(req,res){
+    User.findOne({
+        where: {id: req.body.userId}
+    })
+        .then(function (user) {
+            if (!user.notifications){
+                user.updateAttributes({             //the user now have notification cause he is removed
+                    notifications: true
+                });
+            }
+        });
+
+    UserProject.findOne({
+        where: {UserId: req.body.userId, ProjectId: req.body.projectId}
+    })
+        .then(function (userProject) {
+            userProject.updateAttributes({
+                shareStatus: "deleted"
+            })
+                .then(function(){
+                    setProjectToUnshared(req.body.projectId)
+                    res.json({
+                        success: true
+                    });
+                });
         })
 };

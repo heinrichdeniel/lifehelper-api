@@ -41,9 +41,9 @@ var db = {
             primaryKey: true,
             autoIncrement: true
         },
-        deleted:{
-            type: Sequelize.BOOLEAN,
-            defaultValue: false
+        shareStatus: {
+            type: Sequelize.STRING,
+            defaultValue: "nothing"
         }
     })
 };
@@ -56,9 +56,13 @@ db.User.hasOne(db.UserTask);
 db.UserTask.belongsTo(db.User,  {foreignKey: 'sharedBy', as: 'sharedUser'});
 db.UserTask.belongsTo(db.Task);
 
-
 db.User.belongsToMany(db.Project, { through: db.UserProject });
 db.Project.belongsToMany(db.User, { through: db.UserProject });
+
+db.Project.hasMany(db.UserProject);
+db.User.hasOne(db.UserProject);
+db.UserProject.belongsTo(db.User,  {foreignKey: 'sharedBy', as: 'sharedUser'});
+db.UserProject.belongsTo(db.Project);
 
 db.Project.hasMany(db.Task, { onDelete: 'cascade' });
 db.Task.belongsTo(db.Project);

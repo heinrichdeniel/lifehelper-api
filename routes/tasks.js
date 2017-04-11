@@ -15,6 +15,8 @@ router.post('/acceptShare', checkToken, tasks.acceptShare);
 
 router.post('/declineShare', checkToken, tasks.declineShare);
 
+router.post('/removeShare', checkToken, tasks.removeShare);
+
 router.post('/delete/:id', checkToken, tasks.delete);
 
 router.post('/', checkToken, tasks.create);

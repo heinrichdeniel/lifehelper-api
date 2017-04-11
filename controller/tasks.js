@@ -4,6 +4,7 @@ var UserTask   = require('../database').UserTask;
 var Project   = require('../database').Project;
 
 var assignTaskToUser = require('../utils/assignTaskToUser');
+var setTaskToUnshared = require('../utils/setTaskToUnshared');
 
 //creating a new task
 exports.create = function(req,res){
@@ -105,7 +106,8 @@ exports.getList = function(req,res){
                     UserId: req.user.id,
                     $and: [
                         {shareStatus: {$ne: "pending"}},
-                        {shareStatus: {$ne: "declined"}}
+                        {shareStatus: {$ne: "declined"}},
+                        {shareStatus: {$ne: "deleted"}}
                     ]
 
                 }
@@ -183,16 +185,11 @@ exports.getTask = function(req,res){
 
 //delete task
 exports.delete = function(req,res){
-    Task.findOne({
-        where: {id: req.body.id},
-        include: {model: User, attributes: [],where:{
-            id: req.user.id
-        }}
+    UserTask.destroy({
+        where: {UserId: req.user.id, TaskId: req.body.id}
     })
-        .then(function(task) {
-            task.updateAttributes({             //updating attributes
-                status: 'deleted'
-            });
+        .then(function() {
+            setTaskToUnshared(req.body.id);
             res.json({                      //response with status 200
                 success: true
             });
@@ -202,16 +199,29 @@ exports.delete = function(req,res){
 //if the user want to share a task with other user(s)
 exports.shareTask = function(req,res){
     req.body.users.map( function(user) {
-        UserTask.create({
-            UserId: user.value,
-            TaskId: req.body.task.id,
-            shareStatus: "pending",
-            sharedBy: req.user.id
-        }).catch(function (e) {
-            res.json({                      //response with status 200
-                success: false
+        UserTask.findOne({
+            where: {UserId: user.value, TaskId: req.body.task.id}
+        })
+            .then(function(userTask){
+                if (!userTask){
+                    UserTask.create({
+                        UserId: user.value,
+                        TaskId: req.body.task.id,
+                        shareStatus: "pending",
+                        sharedBy: req.user.id
+                    }).catch(function (e) {
+                        res.json({                      //response with status 200
+                            success: false
+                        });
+                    });
+                }
+                else{
+                    userTask.updateAttributes({
+                        shareStatus: "pending"
+                    })
+                }
             });
-        });
+
         User.findOne({
             where: {id: user.value}
         })
@@ -262,10 +272,41 @@ exports.declineShare = function(req,res){
             userTask.updateAttributes({
                 shareStatus: "declined"
             }).then(function() {
+                setTaskToUnshared(req.body.taskId);
                 res.json({
                     success: true
                 });
             });
         });
+};
+
+
+//if the user want to remove the share
+exports.removeShare = function(req,res){
+    User.findOne({
+        where: {id: req.body.userId}
+    })
+        .then(function (user) {
+            if (!user.notifications){
+                user.updateAttributes({             //the user now have notification cause he is removed
+                    notifications: true
+                });
+            }
+        });
+
+    UserTask.findOne({
+        where: {UserId: req.body.userId, TaskId: req.body.taskId}
+    })
+        .then(function (userTask) {
+            userTask.updateAttributes({
+                shareStatus: "deleted"
+            })
+                .then(function(){
+                    setTaskToUnshared(req.body.taskId);
+                    res.json({
+                        success: true
+                    });
+                });
+        })
 };
 

@@ -1,0 +1,21 @@
+var UserProject   = require('../database').UserProject;
+var Project   = require('../database').Project;
+
+module.exports = function (projectId) {
+    UserProject.count(         //check if remained at least one collaborator
+        {
+            where: {TaskId: projectId ,shareStatus: {$ne: "deleted"}}
+        }
+    )
+        .then(function(count){
+            if ( count == 1 ) {
+                Project.findOne({          //updating the shared attribute of the task
+                    where: {id: projectId}
+                }).then(function (project) {
+                    project.updateAttributes({
+                        shared: false
+                    });
+                });
+            }
+        })
+};

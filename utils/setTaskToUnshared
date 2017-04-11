@@ -1,0 +1,21 @@
+var UserTask   = require('../database').UserTask;
+var Task   = require('../database').Task;
+
+module.exports = function (taskId) {
+    UserTask.count(         //check if remained at least one collaborator
+        {
+            where: {TaskId: taskId ,shareStatus: {$ne: "deleted"}}
+        }
+    )
+        .then(function(count){
+            if ( count == 1 ) {
+                Task.findOne({          //updating the shared attribute of the task
+                    where: {id: taskId}
+                }).then(function (task) {
+                    task.updateAttributes({
+                        shared: false
+                    });
+                });
+            }
+        })
+};

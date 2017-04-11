@@ -1,6 +1,7 @@
 var User   = require('../database').User;
 var Project   = require('../database').Project;
 var UserTask   = require('../database').UserTask;
+var UserProject   = require('../database').UserProject;
 var Task   = require('../database').Task;
 var sequelize   = require('../database').sequelize;
 
@@ -228,11 +229,18 @@ exports.updateAccountSettings = function(req,res){
 exports.getListByFilter = function(req,res){
     User.findAll({
         attributes: ['id', 'username', 'email', 'photo_url'],
-        include: {
-            model: Task, attributes: ['id'], through: {
-                attributes: []
+        include: [
+            {
+                model: Task, attributes: ['id'], through: {
+                attributes: [], where:{ shareStatus: {$ne: 'deleted'}  }
             }
-        },
+            },
+            {
+                model: Project, attributes: ['id'], through: {
+                attributes: [], where: {shareStatus: {$ne: 'deleted'}}
+            }
+            }
+        ],
         where: {
             $or:[
                 sequelize.where(sequelize.fn('lower', sequelize.col('email')), {$like: sequelize.fn('lower', req.query.filter+"%")}),
@@ -245,29 +253,52 @@ exports.getListByFilter = function(req,res){
             res.json({                      //response with status 200
                 success: true,
                 users: users,
-                taskId: req.query.taskId
+                taskId: req.query.taskId,
+                projectId: req.query.projectId
             });
         });
 }
 
 exports.getCollaborators = function(req,res){       //return collaborators of task or project
-    User.findAll({
-        attributes: ['id', 'username', 'email', 'photo_url'],
-        include: {
-            model: Task, attributes: ['id','owner'], where: {id: req.query.taskId},through: {
-                attributes: ['shareStatus','sharedBy']
+    if (req.query.taskId){                         //if the request contain taskId then return the collaborators of the task
+        User.findAll({
+            attributes: ['id', 'username', 'email', 'photo_url'],
+            include: {
+                model: Task, attributes: ['id','owner'], where: {id: req.query.taskId},through: {
+                    attributes: ['shareStatus','sharedBy']
+                }
+            },
+            where: {
+                id: {$ne: req.user.id}
             }
-        },
-        where: {
-            id: {$ne: req.user.id}
-        }
-    })
-        .then(function(users) {
-            res.json({                      //response with status 200
-                success: true,
-                users: users
+        })
+            .then(function(users) {
+                res.json({                      //response with status 200
+                    success: true,
+                    users: users
+                });
             });
-        });
+    }
+    else if (req.query.projectId){               //if the request contain projectId then return the collaborators of the project
+        User.findAll({
+            attributes: ['id', 'username', 'email', 'photo_url'],
+            include: {
+                model: Project, attributes: ['id','owner'], where: {id: req.query.projectId},through: {
+                    attributes: ['shareStatus','sharedBy']
+                }
+            },
+            where: {
+                id: {$ne: req.user.id}
+            }
+        })
+            .then(function(users) {
+                res.json({                      //response with status 200
+                    success: true,
+                    users: users
+                });
+            });
+    }
+
 }
 
 exports.getNotifications = function(req,res){       //return the tasks where the user got share request
@@ -276,7 +307,7 @@ exports.getNotifications = function(req,res){       //return the tasks where the
     })
         .then(function (user) {
             if (user.notifications){
-                user.updateAttributes({             //the user now have notifications
+                user.updateAttributes({             //disable notifications
                     notifications: false
                 });
             }
@@ -287,7 +318,10 @@ exports.getNotifications = function(req,res){       //return the tasks where the
             {
                 model: UserTask,
                 attributes: ['shareStatus'],
-                where: {UserId: req.user.id, shareStatus: "pending"},
+                where: {
+                    UserId: req.user.id,
+                    shareStatus: {$or: ["pending","deleted"]}
+                },
                 include: {
                     model: User,
                     as: 'sharedUser'
@@ -295,16 +329,35 @@ exports.getNotifications = function(req,res){       //return the tasks where the
             },
             {
                 model: Project,
-                attributes: ['name'],
+                attributes: ['name']
             }
-        ],
+        ]
     })
         .then(function(tasks) {
-            res.json({                      //response with status 200
-                success: true,
-                notifications: {
-                    tasks: tasks
-                }
-            });
+            Project.findAll({
+                include: [
+                    {
+                        model: UserProject,
+                        attributes: ['shareStatus'],
+                        where: {
+                            UserId: req.user.id,
+                            shareStatus: {$or: ["pending","deleted"]}
+                        },
+                        include: {
+                            model: User,
+                            as: 'sharedUser'
+                        }
+                    }
+                ]
+            })
+                .then(function(projects) {
+                    res.json({                      //response with status 200
+                        success: true,
+                        notifications: {
+                            tasks: tasks,
+                            projects: projects
+                        }
+                    });
+                });
         });
 }

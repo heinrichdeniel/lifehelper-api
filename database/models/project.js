@@ -11,14 +11,14 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        deleted:{
+        status:{
+            type: DataTypes.STRING,
+            defaultValue: "pending"
+        },
+        shared: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        archived: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
-        },
-        createdBy:DataTypes.INTEGER
+        owner: DataTypes.INTEGER
     })
 };
