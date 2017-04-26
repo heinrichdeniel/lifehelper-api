@@ -98,7 +98,8 @@ exports.getList = function(req,res){
                         }
                     },
                     {
-                        model: Comment
+                        model: Comment,
+                        include: {model: User, attributes: ['id', 'username', 'photo_url']}
                     }
                 ]
             })
