@@ -1,0 +1,56 @@
+var Task   = require('../database').Task;
+var Project   = require('../database').Project;
+var UserTask   = require('../database').UserTask;
+var UserProject   = require('../database').UserProject;
+
+module.exports = function (userId, taskId, projectId) {
+    if (taskId){
+        Task.findOne({
+            where: {
+                id: taskId
+            }
+        }).then(function (task) {
+            task.updateAttributes({
+                commented: true
+            })
+        });
+        UserTask.findAll({
+            where: {
+                TaskId: taskId
+            }
+        }).then(function (userTasks) {
+            userTasks.map( function(userTask){
+                if (userTask.UserId != userId){
+                    userTask.updateAttributes({
+                        newComment: true
+                    })
+                }
+            })
+        });
+    }
+    else{
+        Project.findOne({
+            where: {
+                id: projectId
+            }
+        }).then(function (project) {
+            project.updateAttributes({
+                commented: true
+            })
+        });
+        UserProject.findAll({
+            where: {
+                ProjectId: projectId
+            }
+        }).then(function (userProjects) {
+            userProjects.map( function(userProject){
+                if (userProject.UserId != userId) {
+                    userProject.updateAttributes({
+                        newComment: true
+                    })
+                }
+            })
+        });
+    }
+
+};

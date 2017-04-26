@@ -79,7 +79,7 @@ exports.create = function(req,res){
                         {model: Project}
                     ]
                 }).then(function(task) {
-                    if (task.Project.shared){           //if the selected project is shared with other users
+                    if (task.Project && task.Project.shared){           //if the selected project is shared with other users
                         assignTaskToCollaborators(task,req.user.id);
                         task.updateAttributes({shared: true})
                     }

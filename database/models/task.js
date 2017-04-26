@@ -21,6 +21,10 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         },
-        owner: DataTypes.INTEGER
+        owner: DataTypes.INTEGER,
+        commented:  {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
     })
 };

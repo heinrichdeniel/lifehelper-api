@@ -7,6 +7,7 @@ var db = require('./database');
 var user = require('./routes/user');
 var tasks = require('./routes/tasks');
 var projects = require('./routes/projects');
+var comments = require('./routes/comments');
 
 var app = express();
 
@@ -22,6 +23,7 @@ app.use(cors);
 app.use('/user', user);
 app.use('/tasks', tasks);
 app.use('/projects', projects);
+app.use('/comments', comments);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

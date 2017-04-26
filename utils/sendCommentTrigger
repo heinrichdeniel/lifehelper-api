@@ -1,0 +1,43 @@
+var UserTask   = require('../database').UserTask;
+var UserProject   = require('../database').UserProject;
+
+
+module.exports = function (pusher, taskId, projectId) {         //sending trigger to users cause a new comment was created
+    if (taskId){
+        UserTask.findAll({
+            where: {
+                TaskId: taskId,
+                $and: [
+                    {shareStatus: {$ne: "pending"}},
+                    {shareStatus: {$ne: "declined"}},
+                    {shareStatus: {$ne: "deleted"}}
+                ]
+            }
+        }).then(function (userTasks) {
+            userTasks.map( function(userTask){
+                pusher.trigger('comments', userTask.UserId.toString(), {
+                    "message": "New comment created!"
+                });
+            })
+        });
+    }
+    else{
+        UserProject.findAll({
+            where: {
+                ProjectId: projectId,
+                $and: [
+                    {shareStatus: {$ne: "pending"}},
+                    {shareStatus: {$ne: "declined"}},
+                    {shareStatus: {$ne: "deleted"}}
+                ]
+            }
+        }).then(function (userProjects) {
+            userProjects.map( function(userProject){
+                pusher.trigger('comments', userProject.UserId.toString(), {
+                    "message": "New comment created!"
+                });
+            })
+        });
+    }
+
+};

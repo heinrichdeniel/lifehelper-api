@@ -22,6 +22,7 @@ var db = {
     User:      sequelize.import('./models/user'),
     Task:      sequelize.import('./models/task'),
     Project:   sequelize.import('./models/project'),
+    Comment:   sequelize.import('./models/comment'),
 
     UserTask: sequelize.define('UserTask',{     //n-m relation table between User and Task
         id: {
@@ -32,6 +33,10 @@ var db = {
         shareStatus: {
             type: Sequelize.STRING,
             defaultValue: "nothing"
+        },
+        newComment: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
     }),
 
@@ -44,8 +49,13 @@ var db = {
         shareStatus: {
             type: Sequelize.STRING,
             defaultValue: "nothing"
+        },
+        newComment: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false
         }
     })
+
 };
 
 db.User.belongsToMany(db.Task,  { through: db.UserTask, foreignKey: "UserId" });
@@ -66,5 +76,11 @@ db.UserProject.belongsTo(db.Project);
 
 db.Project.hasMany(db.Task, { onDelete: 'cascade' });
 db.Task.belongsTo(db.Project);
+
+
+db.Task.hasMany(db.Comment);
+db.Project.hasMany(db.Comment);
+db.User.hasMany(db.Comment);
+db.Comment.belongsTo(db.User);
 
 module.exports = db;
