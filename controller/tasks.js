@@ -2,6 +2,15 @@ var Task   = require('../database').Task;
 var User   = require('../database').User;
 var UserTask   = require('../database').UserTask;
 var Project   = require('../database').Project;
+var Pusher = require('pusher');
+
+var pusher = new Pusher({
+    appId: '331677',
+    key: 'c8ef916cb507629d3a96',
+    secret: 'febf13ca72bd9d0e438a',
+    cluster: 'eu',
+    encrypted: true
+});
 
 var assignTaskToUser = require('../utils/assignTaskToUser');
 var setTaskToUnshared = require('../utils/setTaskToUnshared');
@@ -208,6 +217,9 @@ exports.shareTask = function(req,res){
             where: {UserId: user.value, TaskId: req.body.task.id}
         })
             .then(function(userTask){
+                pusher.trigger('notifications', user.value.toString(), {
+                    "message": "New notification!"
+                });
                 if (!userTask){
                     UserTask.create({
                         UserId: user.value,

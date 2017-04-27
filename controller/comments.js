@@ -36,6 +36,7 @@ exports.createOrUpdate = function(req,res){
                 })
             })
     }
+
     else {          //creating the new comment if it not exists
         Comment.create({
             text: req.body.text,
@@ -60,7 +61,6 @@ exports.createOrUpdate = function(req,res){
 exports.getList = function(req,res){
     Task.findAll({
         attributes:['id', 'name'],
-        where: { commented: true },
         include: [
             {
                 model: UserTask,
@@ -78,12 +78,16 @@ exports.getList = function(req,res){
                 model: Comment,
                 include: {model: User, attributes: ['id', 'username', 'photo_url']}
             }
+        ],
+        order: [
+            [ UserTask, 'newComment', 'DESC'],
+            [ 'name' , 'ASC'],
+            [ Comment, 'createdAt', 'ASC']
         ]
     })
         .then(function(tasks) {                      // then get the comments fo the tasks
             Project.findAll({
                 attributes:['id', 'name'],
-                where: { commented: true },
                 include: [
                     {
                         model: UserProject,
@@ -99,8 +103,13 @@ exports.getList = function(req,res){
                     },
                     {
                         model: Comment,
-                        include: {model: User, attributes: ['id', 'username', 'photo_url']}
+                        include: {model: User, attributes: ['id', 'username', 'photo_url']},
                     }
+                ],
+                order: [
+                    [ UserProject, 'newComment', 'DESC'],
+                    [ 'name' , 'ASC'],
+                    [ Comment, 'createdAt', 'ASC']
                 ]
             })
                 .then(function(projects) {

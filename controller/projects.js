@@ -1,6 +1,15 @@
 var Project   = require('../database').Project;
 var User   = require('../database').User;
 var UserProject   = require('../database').UserProject;
+var Pusher = require('pusher');
+
+var pusher = new Pusher({
+    appId: '331677',
+    key: 'c8ef916cb507629d3a96',
+    secret: 'febf13ca72bd9d0e438a',
+    cluster: 'eu',
+    encrypted: true
+});
 
 var assignProjectToUser = require('../utils/assignProjectToUser');
 var setProjectToUnshared = require('../utils/setProjectToUnshared');
@@ -126,6 +135,9 @@ exports.shareProject = function(req,res){
             where: {UserId: user.value, ProjectId: req.body.project.id}
         })
             .then(function(userProject){
+                pusher.trigger('notifications', user.value.toString(), {
+                    "message": "New notification!"
+                });
                 if (!userProject){
                     UserProject.create({
                         UserId: user.value,
