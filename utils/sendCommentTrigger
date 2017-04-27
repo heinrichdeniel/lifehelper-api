@@ -2,11 +2,12 @@ var UserTask   = require('../database').UserTask;
 var UserProject   = require('../database').UserProject;
 
 
-module.exports = function (pusher, taskId, projectId) {         //sending trigger to users cause a new comment was created
+module.exports = function (pusher, taskId, projectId, userId) {         //sending trigger to users cause a new comment was created
     if (taskId){
         UserTask.findAll({
             where: {
                 TaskId: taskId,
+                $ne: {UserId: userId},
                 $and: [
                     {shareStatus: {$ne: "pending"}},
                     {shareStatus: {$ne: "declined"}},
@@ -25,6 +26,7 @@ module.exports = function (pusher, taskId, projectId) {         //sending trigge
         UserProject.findAll({
             where: {
                 ProjectId: projectId,
+                $ne: {UserId: userId},
                 $and: [
                     {shareStatus: {$ne: "pending"}},
                     {shareStatus: {$ne: "declined"}},

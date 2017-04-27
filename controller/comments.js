@@ -4,6 +4,7 @@ var Project   = require('../database').Project;
 var User   = require('../database').User;
 var UserTask   = require('../database').UserTask;
 var UserProject   = require('../database').UserProject;
+var sequelize   = require('../database').sequelize;
 var Pusher = require('pusher');
 
 var pusher = new Pusher({
@@ -27,7 +28,7 @@ exports.createOrUpdate = function(req,res){
                 comment.updateAttributes({             //updating attributes
                     text: req.body.text
                 }).then(function(){
-                    sendCommentTrigger(pusher, req.body.taskId, req.body.projectId);
+                    sendCommentTrigger(pusher, req.body.taskId, req.body.projectId, req.user.id);
                     res.json({                      //response with status 200
                         success: true,
                         message: 'Comment updated!',
@@ -36,7 +37,6 @@ exports.createOrUpdate = function(req,res){
                 })
             })
     }
-
     else {          //creating the new comment if it not exists
         Comment.create({
             text: req.body.text,
@@ -46,7 +46,7 @@ exports.createOrUpdate = function(req,res){
             createdAt: new Date()
         })
             .then(function (comment) {
-                sendCommentTrigger(pusher, req.body.taskId, req.body.projectId);
+                sendCommentTrigger(pusher, req.body.taskId, req.body.projectId, req.user.id);
                 res.json({                      //response with status 200
                     success: true,
                     message: 'Comment added to database!',
@@ -112,12 +112,31 @@ exports.getList = function(req,res){
                     [ Comment, 'createdAt', 'ASC']
                 ]
             })
-                .then(function(projects) {
-                    res.json({                      //response with status 200
-                        success: true,
-                        taskComments: tasks,
-                        projectComments: projects
+                .then(function(projects) {          //counting the new comments
+                    var commentCount = 0;
+                    UserTask.count({
+                        where: {
+                            UserId: req.user.id,
+                            newComment: true
+                        }
+                    }).then( function(count){
+                        commentCount = count;
+                        UserProject.count({
+                            where: {
+                                UserId: req.user.id,
+                                newComment: true
+                            }
+                        }).then( function(count){
+                            commentCount += count;
+                            res.json({                      //response with status 200
+                                success: true,
+                                taskComments: tasks,
+                                projectComments: projects,
+                                commentCount: commentCount
+                            });
+                        });
                     });
+
                 });
         })
 };
@@ -193,6 +212,9 @@ exports.clearNewComment = function(req,res) {
                         model: Comment,
                         include: {model: User, attributes: ['id', 'username', 'photo_url']}
                     }
+                ],
+                order: [
+                    [ Comment, 'createdAt', 'ASC']
                 ]
             }).then(function (task) {
                 res.json({                      //response with status 200
@@ -231,6 +253,9 @@ exports.clearNewComment = function(req,res) {
                         model: Comment,
                         include: {model: User, attributes: ['id', 'username', 'photo_url']}
                     }
+                ],
+                order: [
+                    [ Comment, 'createdAt', 'ASC']
                 ]
             }).then(function (project) {
                 res.json({                      //response with status 200
