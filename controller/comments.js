@@ -4,7 +4,6 @@ var Project   = require('../database').Project;
 var User   = require('../database').User;
 var UserTask   = require('../database').UserTask;
 var UserProject   = require('../database').UserProject;
-var sequelize   = require('../database').sequelize;
 var Pusher = require('pusher');
 
 var pusher = new Pusher({
@@ -190,38 +189,39 @@ exports.clearNewComment = function(req,res) {
                 TaskId: req.body.task.id
             }
         }).then(function (userTask) {
-            userTask.updateAttributes({newComment: false});
-
-            Task.findOne({
-                attributes: ['id', 'name'],
-                where: {id: req.body.task.id},
-                include: [
-                    {
-                        model: UserTask,
-                        attributes: ['newComment'],
-                        where: {
-                            UserId: req.user.id,
-                            $and: [
-                                {shareStatus: {$ne: "pending"}},
-                                {shareStatus: {$ne: "declined"}},
-                                {shareStatus: {$ne: "deleted"}}
-                            ]
-                        }
-                    },
-                    {
-                        model: Comment,
-                        include: {model: User, attributes: ['id', 'username', 'photo_url']}
-                    }
-                ],
-                order: [
-                    [ Comment, 'createdAt', 'ASC']
-                ]
-            }).then(function (task) {
-                res.json({                      //response with status 200
-                    success: true,
-                    taskComment: task
-                });
-            });
+            userTask.updateAttributes({newComment: false})
+                .then(function(){
+                    Task.findOne({
+                        attributes: ['id', 'name'],
+                        where: {id: req.body.task.id},
+                        include: [
+                            {
+                                model: UserTask,
+                                attributes: ['newComment'],
+                                where: {
+                                    UserId: req.user.id,
+                                    $and: [
+                                        {shareStatus: {$ne: "pending"}},
+                                        {shareStatus: {$ne: "declined"}},
+                                        {shareStatus: {$ne: "deleted"}}
+                                    ]
+                                }
+                            },
+                            {
+                                model: Comment,
+                                include: {model: User, attributes: ['id', 'username', 'photo_url']}
+                            }
+                        ],
+                        order: [
+                            [ Comment, 'createdAt', 'ASC']
+                        ]
+                    }).then(function (task) {
+                        res.json({                      //response with status 200
+                            success: true,
+                            taskComment: task
+                        });
+                    });
+                })
         })
     }
     else {
@@ -231,38 +231,40 @@ exports.clearNewComment = function(req,res) {
                 ProjectId: req.body.project.id
             }
         }).then(function (userProject) {
-            userProject.updateAttributes({newComment: false});
-
-            Project.findOne({
-                attributes: ['id', 'name'],
-                where: {id: req.body.project.id},
-                include: [
-                    {
-                        model: UserProject,
-                        attributes: ['newComment'],
-                        where: {
-                            UserId: req.user.id,
-                            $and: [
-                                {shareStatus: {$ne: "pending"}},
-                                {shareStatus: {$ne: "declined"}},
-                                {shareStatus: {$ne: "deleted"}}
-                            ]
-                        }
-                    },
-                    {
-                        model: Comment,
-                        include: {model: User, attributes: ['id', 'username', 'photo_url']}
-                    }
-                ],
-                order: [
-                    [ Comment, 'createdAt', 'ASC']
-                ]
-            }).then(function (project) {
-                res.json({                      //response with status 200
-                    success: true,
-                    projectComment: project
-                });
-            });
+            userProject.updateAttributes({newComment: false})
+                .then(function(){
+                    Project.findOne({
+                        attributes: ['id', 'name'],
+                        where: {id: req.body.project.id},
+                        include: [
+                            {
+                                model: UserProject,
+                                attributes: ['newComment'],
+                                where: {
+                                    UserId: req.user.id,
+                                    $and: [
+                                        {shareStatus: {$ne: "pending"}},
+                                        {shareStatus: {$ne: "declined"}},
+                                        {shareStatus: {$ne: "deleted"}}
+                                    ]
+                                }
+                            },
+                            {
+                                model: Comment,
+                                include: {model: User, attributes: ['id', 'username', 'photo_url']}
+                            }
+                        ],
+                        order: [
+                            [ Comment, 'createdAt', 'ASC']
+                        ]
+                    }).then(function (project) {
+                        res.json({                      //response with status 200
+                            success: true,
+                            projectComment: project
+                        });
+                    });
+                })
         })
     }
 };
+

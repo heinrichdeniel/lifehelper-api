@@ -7,7 +7,7 @@ module.exports = function (pusher, taskId, projectId, userId) {         //sendin
         UserTask.findAll({
             where: {
                 TaskId: taskId,
-                $ne: {UserId: userId},
+                UserId: {$ne: userId},
                 $and: [
                     {shareStatus: {$ne: "pending"}},
                     {shareStatus: {$ne: "declined"}},
@@ -20,7 +20,7 @@ module.exports = function (pusher, taskId, projectId, userId) {         //sendin
                     "message": "New comment created!"
                 });
             })
-        });
+        })
     }
     else{
         UserProject.findAll({
