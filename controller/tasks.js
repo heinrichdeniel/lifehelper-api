@@ -2,7 +2,9 @@ var Task   = require('../database').Task;
 var User   = require('../database').User;
 var UserTask   = require('../database').UserTask;
 var Project   = require('../database').Project;
+var Sequelize = require('../database').Sequelize;
 var Pusher = require('pusher');
+var moment = require('moment');
 
 var pusher = new Pusher({
     appId: '331677',
@@ -15,6 +17,7 @@ var pusher = new Pusher({
 var assignTaskToUser = require('../utils/assignTaskToUser');
 var setTaskToUnshared = require('../utils/setTaskToUnshared');
 var assignTaskToCollaborators = require('../utils/assignTaskToCollaborators');
+var setPriorityOfTask = require('../utils/setPriorityOfTask');
 
 //creating a new task
 exports.create = function(req,res){
@@ -132,6 +135,7 @@ exports.getList = function(req,res){
             status: "pending"
         },
         order: [
+            [Sequelize.col('priority', 'UserTask'), 'ASC'],
             ['date', 'ASC'],
             ['time', 'ASC']
         ]
@@ -142,6 +146,7 @@ exports.getList = function(req,res){
                 tasks: tasks.rows
             });
         })
+
 };
 
 exports.getArchive = function(req,res){         //get tasks, where archived = true or completed = true
@@ -156,6 +161,7 @@ exports.getArchive = function(req,res){         //get tasks, where archived = tr
             status:  {$in:[ 'completed', 'archived']}
         },
         order: [
+            [Sequelize.col('priority', 'UserTask'), 'ASC'],
             ['date', 'ASC'],
             ['time', 'ASC']
         ]
@@ -226,11 +232,14 @@ exports.shareTask = function(req,res){
                         TaskId: req.body.task.id,
                         shareStatus: "pending",
                         sharedBy: req.user.id
-                    }).catch(function (e) {
-                        res.json({                      //response with status 200
-                            success: false
+                    }).then(function (userTask2) {
+                        setPriorityOfTask(user.value,userTask2);
+                    })
+                        .catch(function (e) {
+                            res.json({
+                                success: false
+                            });
                         });
-                    });
                 }
                 else{
                     userTask.updateAttributes({
@@ -325,5 +334,18 @@ exports.removeShare = function(req,res){
                     });
                 });
         })
+};
+
+exports.changeOrder = function(req,res){
+    UserTask.findOne({
+        where: {UserId: req.user.id, TaskId: req.body.taskId}
+    })
+        .then(function(userTask){
+            userTask.updateAttributes({
+                priority: req.body.priority
+            }).then(function() {
+                exports.getList(req,res);
+            });
+        });
 };
 

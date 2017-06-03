@@ -18,13 +18,14 @@ exports.login = function(req,res){
             res.json({ success: false, message: 'Wrong email address or password!'});
         }
         else {               //in case of successfully login
-            var token = generateToken(user.dataValues.id, user.dataValues.email);
+            var object = generateToken(user.dataValues.id, user.dataValues.email);
 
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
                 user: user,
-                token: token
+                token: object.token,
+                exp: object.exp
             });
         }
     })
@@ -42,13 +43,14 @@ exports.registration = function(req,res){
         else {
             User.create({username: req.body.username, email: req.body.email, password: req.body.password.toString('base64')})
                 .then(function(user2) {
-                    var token = generateToken(user2.dataValues.id, user2.dataValues.email);
+                    var object = generateToken(user2.dataValues.id, user2.dataValues.email);
                     addInitialProjects(user2.dataValues.id).then (function(){
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
                             user: user2,
-                            token: token
+                            token: object.token,
+                            exp: object.exp
                         });
                     })
                 })
@@ -71,14 +73,15 @@ exports.loginFacebook = function(req,res){
         if (!user ){                 //if the user not exists in the database
             User.create({ facebook_id:  req.body.facebook_id, username: req.body.name, email: req.body.email, photo_url: req.body.photo_url })
                 .then(function(user2) {
-                    var token = generateToken(user2.dataValues.id, user2.dataValues.email);
+                    var object = generateToken(user2.dataValues.id, user2.dataValues.email);
                     addInitialProjects(user2.dataValues.id).then (function(){
 
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
                             user: user2,
-                            token: token
+                            token: object.token,
+                            exp: object.exp
                         });
                     })
                 })
@@ -95,13 +98,14 @@ exports.loginFacebook = function(req,res){
                     facebook_id: req.body.facebook_id
                 });
             }
-            var token = generateToken(user.dataValues.id, user.dataValues.email);
+            var object = generateToken(user.dataValues.id, user.dataValues.email);
 
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
                 user: user,
-                token: token
+                token: object.token,
+                exp: object.exp
             });
         }
     })
@@ -117,13 +121,14 @@ exports.loginGoogle = function(req,res){
         if (!user ){                 //if the user not exists in the database
             User.create({ google_id:  req.body.google_id, username: req.body.name, email: req.body.email, photo_url: req.body.photo_url })
                 .then(function(user2) {
-                    var token = generateToken(user2.dataValues.id, user2.dataValues.email);
+                    var object = generateToken(user2.dataValues.id, user2.dataValues.email);
                     addInitialProjects(user2.dataValues.id).then (function(){
                         res.json({                      //response with status 200
                             success: true,
                             message: 'Enjoy your token!',
                             user: user2,
-                            token: token
+                            token: object.token,
+                            exp: object.exp
                         });
                     })
                 })
@@ -140,13 +145,14 @@ exports.loginGoogle = function(req,res){
                     google_id: req.body.google_id
                 });
             }
-            var token = generateToken(user.dataValues.id, user.dataValues.email);
+            var object = generateToken(user.dataValues.id, user.dataValues.email);
 
             res.json({                      //response with status 200
                 success: true,
                 message: 'Enjoy your token!',
                 user: user,
-                token: token
+                token: object.token,
+                exp: object.exp
             });
         }
     })

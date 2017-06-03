@@ -23,5 +23,4 @@ router.get('/collaborators', checkToken, user.getCollaborators);
 
 router.get('/notifications', checkToken, user.getNotifications);
 
-
 module.exports = router;

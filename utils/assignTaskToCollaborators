@@ -1,6 +1,8 @@
 var UserProject   = require('../database').UserProject;
 var UserTask   = require('../database').UserTask;
 
+var setPriorityOfTask = require('./setPriorityOfTask');
+
 module.exports = function (task, sharedBy) {
 
     UserProject.findAll({
@@ -15,7 +17,9 @@ module.exports = function (task, sharedBy) {
                 TaskId: task.id,
                 shareStatus: "accepted",
                 sharedBy: sharedBy
-            })
+            }).then(function (userTask) {
+                setPriorityOfTask(user.UserId, userTask);
+            });
         })
     });
 };

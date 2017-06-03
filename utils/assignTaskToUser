@@ -1,9 +1,13 @@
-var User   = require('../database').User;
+var UserTask   = require('../database').UserTask;
+var setPriorityOfTask = require('./setPriorityOfTask');
 
 module.exports = function (task , userId) {
-    User.findOne({where: {id: userId}}).then(function (user) {     //creating relation between Task - User
-        user.addTasks(task).then(function (){
+    UserTask.create({
+        UserId: userId,
+        TaskId: task.id
+    })
+        .then(function (userTask) {
+            setPriorityOfTask(userId, userTask);
             return true;
         });
-    });
 };

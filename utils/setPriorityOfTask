@@ -1,0 +1,27 @@
+var UserTask   = require('../database').UserTask;
+
+module.exports = function (userId, userTask) {
+
+    UserTask.max('priority', {
+        where:
+            {UserId: userId},
+        $and: [
+            {shareStatus: {$ne: "pending"}},
+            {shareStatus: {$ne: "declined"}},
+            {shareStatus: {$ne: "deleted"}}
+        ]
+    }).then(function (priority) {
+        console.log(priority)
+        if (priority) {
+            userTask.updateAttributes({
+                priority: (priority + (Number.MAX_VALUE/2)) / 2
+            })
+        }
+        else {
+            userTask.updateAttributes({
+                priority: ((Number.MAX_VALUE/2)) / 2
+            })
+        }
+    });
+
+};

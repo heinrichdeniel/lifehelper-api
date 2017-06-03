@@ -37,7 +37,9 @@ var db = {
         newComment: {
             type: Sequelize.BOOLEAN,
             defaultValue: false
-        }
+        },
+        priority: Sequelize.DOUBLE
+
     }),
 
     UserProject: sequelize.define('UserProject',{       //n-m relation table between Project and User
