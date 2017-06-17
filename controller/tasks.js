@@ -211,7 +211,9 @@ exports.delete = function(req,res){
         .then(function() {
             setTaskToUnshared(req.body.id);
             res.json({                      //response with status 200
-                success: true
+                success: true,
+                taskId: req.body.id
+
             });
         })
 };
