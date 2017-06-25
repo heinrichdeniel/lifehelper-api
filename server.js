@@ -37,7 +37,7 @@ var PORT = process.env.PORT || 5000;
 
 db.sequelize.sync( ).then(function() {
     app.listen(PORT, function () {
-        debug('API container started on port ' + PORT);
+        console.log('API started on port ' + PORT);
     });
 });
 
